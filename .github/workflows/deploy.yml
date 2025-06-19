@@ -1,0 +1,35 @@
+name: Triển khai ứng dụng AI lên Replit
+
+on:
+  push:
+    branches:
+      - main # Workflow này sẽ chạy mỗi khi có commit được đẩy lên nhánh 'main'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest # Máy chủ ảo mà GitHub Actions sẽ sử dụng để chạy workflow
+    steps:
+      - name: Checkout code # Lấy mã nguồn mới nhất từ kho lưu trữ GitHub
+        uses: actions/checkout@v4
+
+      - name: Cài đặt Node.js và npm (cần cho replctl)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x' # Phiên bản Node.js bạn muốn dùng. replctl được viết bằng Node.js.
+          cache: 'npm'
+
+      - name: Cài đặt Replit CLI (replctl)
+        run: npm install -g @replit/replctl
+
+      - name: Triển khai code lên Replit
+        env:
+          # Lấy REPLIT_API_KEY từ GitHub Secrets mà bạn đã cấu hình trước đó
+          REPLIT_API_KEY: ${{ secrets.REPLIT_API_KEY }}
+        run: |
+          # Lệnh `replctl deploy` sẽ đẩy toàn bộ nội dung của thư mục hiện tại
+          # (tức là mã nguồn ứng dụng của bạn) lên Repl đã chỉ định.
+          replctl deploy --repl TeamsClone --file . # Đã sửa tên Repl thành TeamsClone
+          echo "✅ Đã triển khai ứng dụng AI thành công lên Replit!"
+
+      - name: Thông báo hoàn tất (Tùy chọn)
+        run: echo "Workflow triển khai Replit đã hoàn tất."
